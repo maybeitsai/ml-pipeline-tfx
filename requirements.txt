@@ -4,5 +4,6 @@ tfx==1.11.0
 ipykernel
 scikit-learn
 joblib
+requests
 jupyter
 keras-tuner
