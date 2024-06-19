@@ -16,9 +16,15 @@ def transformed_name(key):
 # Mengubah teks menjadi huruf kecil dan mengubah tipe data label menjadi int64
 def preprocessing_fn(inputs): # inputs: map from feature keys to raw features. 
     outputs = {}
-    
+
+     # Lowercase the Sentence feature
     outputs[transformed_name(FEATURE_KEY)] = tf.strings.lower(inputs[FEATURE_KEY])
     
+    # Remove single and double quotes
+    outputs[transformed_name(FEATURE_KEY)] = tf.strings.regex_replace(outputs[transformed_name(FEATURE_KEY)], "'", "")
+    outputs[transformed_name(FEATURE_KEY)] = tf.strings.regex_replace(outputs[transformed_name(FEATURE_KEY)], '"', "")
+    
+    # Cast label to int64
     outputs[transformed_name(LABEL_KEY)] = tf.cast(inputs[LABEL_KEY], tf.int64)
     
     return outputs # outputs: map from feature keys to transformed features. 
