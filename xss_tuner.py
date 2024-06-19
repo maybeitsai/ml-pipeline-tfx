@@ -1,3 +1,6 @@
+# File ini berisi fungsi-fungsi untuk men-tuning model menggunakan Keras Tuner
+
+# Import Library
 import kerastuner as kt
 import tensorflow as tf
 from tensorflow.keras import layers # type: ignore
@@ -5,15 +8,20 @@ from tfx.components.trainer.fn_args_utils import FnArgs
 from tfx.components.tuner.component import TunerFnResult
 import tensorflow_transform as tft
 
+# Variabel Global
 LABEL_KEY = "Label"
 FEATURE_KEY = "Sentence"
 
+# Renaming transformed features
+# Menambahkan suffix _xf ke kunci fitur untuk menunjukkan bahwa fitur tersebut telah ditransformasi.
 def transformed_name(key):
     return key + "_xf"
 
+# Membaca dataset yang dikompres dengan GZIP.
 def gzip_reader_fn(filenames):
     return tf.data.TFRecordDataset(filenames, compression_type='GZIP')
 
+# Membuat dataset yang dibatch menggunakan spesifikasi fitur yang sudah ditransformasi.
 def input_fn(file_pattern, tf_transform_output, num_epochs=None, batch_size=32):
     transform_feature_spec = tf_transform_output.transformed_feature_spec().copy()
     dataset = tf.data.experimental.make_batched_features_dataset(
@@ -25,6 +33,7 @@ def input_fn(file_pattern, tf_transform_output, num_epochs=None, batch_size=32):
         label_key=transformed_name(LABEL_KEY))
     return dataset
 
+# Membangun dan mengkompilasi model Keras dengan lapisan-lapisan yang ditentukan oleh hyperparameter.
 def build_keras_model(hp, vectorize_layer):
     inputs = layers.Input(shape=(1,), dtype=tf.string, name=transformed_name(FEATURE_KEY))
     reshaped_narrative = tf.reshape(inputs, [-1])
@@ -42,6 +51,7 @@ def build_keras_model(hp, vectorize_layer):
                   metrics=['accuracy'])
     return model
 
+# Menjalankan proses tuning menggunakan Keras Tuner dengan RandomSearch
 def tuner_fn(fn_args: FnArgs):
     tf_transform_output = tft.TFTransformOutput(fn_args.transform_graph_path)
     train_set = input_fn(fn_args.train_files, tf_transform_output, num_epochs=5)
