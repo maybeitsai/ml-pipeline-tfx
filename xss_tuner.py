@@ -74,7 +74,7 @@ def tuner_fn(fn_args: FnArgs):
         model_builder,
         objective='val_accuracy',
         seed=42,
-        max_trials=50,
+        max_trials=30,
         directory=fn_args.working_dir,
         project_name='xss_tuning')
 
